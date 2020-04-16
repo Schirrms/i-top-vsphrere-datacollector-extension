@@ -121,7 +121,7 @@
 			"attcode": "status",
 			"update": "1",
 			"reconcile": "0",
-			"update_policy": "master_locked",
+			"update_policy": "master_unlocked",
 			"finalclass": "SynchroAttribute",
 			"friendlyname": "status"
 		},
@@ -138,7 +138,7 @@
 			"friendlyname": "tickets_list"
 		}
 	],
-	"user_delete_policy": "nobody",
+	"user_delete_policy": "administrators",
 	"url_icon": "",
 	"url_application": ""
 }

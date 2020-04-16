@@ -29,7 +29,7 @@ Collect for each VM the space usage on each Datastore (but this works because of
 
 A picture better than a long text :
 
-![](D:\git\itop-vsphere-datacollector-extension\images\VM-Datastore-Usage.png)
+![A picture of my customized VM view](images/VM-Datastore-Usage.png)
 
 Collect the custom attributes, but most of them are for custom fields in iTop..
 

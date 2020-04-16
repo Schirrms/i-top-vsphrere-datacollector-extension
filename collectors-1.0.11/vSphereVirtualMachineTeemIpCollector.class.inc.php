@@ -18,9 +18,9 @@ class vSphereVirtualMachineTeemIpCollector extends vSphereVirtualMachineCollecto
 {
 	protected $oIPAddressLookup;
 
-	static protected function DoCollectVMInfo($aFarms, $oVirtualMachine, $aVLANs, $idx)
+	static protected function DoCollectVMInfo($aFarms, $oVirtualMachine, $aVLANs, $idx, $aDatastoreNaa)
 	{
-		$aResult = parent::DoCollectVMInfo($aFarms, $oVirtualMachine, $aVLANs, $idx);
+		$aResult = parent::DoCollectVMInfo($aFarms, $oVirtualMachine, $aVLANs, $idx, $aDatastoreNaa);
 
 		if ($aResult !== null)
 		{

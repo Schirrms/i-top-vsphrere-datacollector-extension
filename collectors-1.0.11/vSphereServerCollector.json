@@ -311,7 +311,7 @@
 			"attcode": "status",
 			"update": "1",
 			"reconcile": "0",
-			"update_policy": "master_locked",
+			"update_policy": "master_unlocked",
 			"finalclass": "SynchroAttribute",
 			"friendlyname": "status"
 		},
@@ -336,7 +336,7 @@
 			"friendlyname": "S_UUID"
 		}
 	],
-	"user_delete_policy": "nobody",
+	"user_delete_policy": "administrators",
 	"url_icon": "",
 	"url_application": ""
 }

@@ -119,13 +119,21 @@ class vSphereVirtualMachineCollector extends Collector
 				}
 			}
 			
+      // get all datastores of the host to create a name to ids map
+      $aDatastores      = $vhost->findAllManagedObjects('Datastore', 'all');
+      $aDatastoresNaa   = array();
+      foreach ($aDatastores as $DS)
+      {
+        $aDatastoreNaa[$DS->name] = $DS->info->vmfs->extent[0]->diskName;
+      }
+
 			$aVirtualMachines = $vhost->findAllManagedObjects('VirtualMachine', array('config', 'runtime', 'guest', 'network', 'storage'));
 
 			$idx = 1;
 			foreach($aVirtualMachines as $oVirtualMachine)
 			{
 				utils::Log(LOG_DEBUG, ">>>>>> Starting collection of the VM '".$oVirtualMachine->name."' (VM #$idx)");
-				$aVM = static::DoCollectVMInfo($aFarms, $oVirtualMachine, $aVLANs, $idx);
+				$aVM = static::DoCollectVMInfo($aFarms, $oVirtualMachine, $aVLANs, $idx, $aDatastoreNaa);
 				if ($aVM !== null)
 				{
 					static::$aVMInfos[] = $aVM;
@@ -138,7 +146,7 @@ class vSphereVirtualMachineCollector extends Collector
 		return static::$aVMInfos;
 	}
 
-	static protected function DoCollectVMInfo($aFarms, $oVirtualMachine, $aVLANs, $idx)
+	static protected function DoCollectVMInfo($aFarms, $oVirtualMachine, $aVLANs, $idx, $aDatastoreNaa)
 	{
 		utils::Log(LOG_DEBUG, "Runtime->connectionState: ".$oVirtualMachine->runtime->connectionState);
 		utils::Log(LOG_DEBUG, "Runtime->powerState: ".$oVirtualMachine->runtime->powerState);
@@ -214,6 +222,7 @@ class vSphereVirtualMachineCollector extends Collector
 			$aNWInterfaces = static::DoCollectVMIPs($aMACToNetwork, $oVirtualMachine);
 		}
 
+    /*
 		$aVmDSUsage = array();
 		utils::Log(LOG_DEBUG, "Collecting datastores usage for this VM...");
 		foreach ($oVirtualMachine->config->hardware->device as $oVMdev)
@@ -244,7 +253,37 @@ class vSphereVirtualMachineCollector extends Collector
 					'size_used' => $fVmDSUse,
 				);
 			}
-		}
+		}*/
+    //Datastore Usage, v2
+    $aDSUsage   = array();
+    $aVmDSUsage = array();
+    utils::Log(LOG_DEBUG, "Collecting datastores usage for this VM...");
+    foreach ($oVirtualMachine->config->hardware->device as $oVMdev)
+    {
+      if (get_class($oVMdev) == 'VirtualDisk')
+      {
+        // print "        ".get_class($dev)." - ".$dev->capacityInKB." - ".$dev->backing->fileName."\n";
+        $sVMds = $oVMdev->backing->fileName;
+        $sVMds = substr($sVMds, 1, strpos($sVMds, "]") -1);
+        $aVmDSUsage[$sVMds] += $oVMdev->capacityInKB;
+      }
+    }
+
+    utils::Log(LOG_DEBUG, "Compiling datastore usage...");
+    foreach ($aVmDSUsage as $ds => $size)
+    {
+      $lunid = "undefined";
+      if ($aDatastoreNaa[$ds])
+      {
+        $lunid = $aDatastoreNaa[$ds];
+      }
+      $sizeG = str_replace('.', ',', sprintf("%.2F", $size/(1024*1024)));
+      $aDSUsage[] = array (
+        'name'      => $ds,
+        'lun_id'    => $lunid,
+        'size_used' => $sizeG,
+      );
+    }
 
 		$aDisks = array();
 		utils::Log(LOG_DEBUG, "Collecting disk info...");
@@ -319,6 +358,14 @@ class vSphereVirtualMachineCollector extends Collector
 		$sVmUuid = $oVirtualMachine->config->uuid;
 		utils::Log(LOG_DEBUG, "    UUID: $sVmUuid");
 
+		utils::Log(LOG_DEBUG, "Reading powerState...");
+		$sPowerState = $oVirtualMachine->runtime->powerState;
+		utils::Log(LOG_DEBUG, "    powerState: $sPowerState");
+
+		utils::Log(LOG_DEBUG, "Reading vCenter...");
+		$sVcenter = "https://".Utils::GetConfigurationValue('vsphere_uri', '')."/ui/?locale=en_US";
+		utils::Log(LOG_DEBUG, "    vCenter: $sVcenter");
+
 		utils::Log(LOG_DEBUG, "Reading custom attributes...");
 		foreach($aAttrs as $sAttrk => $sAttrv)
 		{
@@ -363,6 +410,8 @@ class vSphereVirtualMachineCollector extends Collector
 			'virtualhost_id' => empty($sFarmName) ? $sHostName : $sFarmName,
 			'description' => $sAnnotation,
 			'S_UUID' => $sVmUuid,
+      'powerState' => $sPowerState,
+      'vcenter' => $sVcenter, 
 		), $aAttrs);
 	}
 
@@ -531,6 +580,8 @@ class vSphereVirtualMachineCollector extends Collector
 			'S_Backup' => $aVM['CA-S_SVG_API']." / ".$aVM['CA-S_SVG_API_MODE']." / ".$aVM['CA-S_SVG_API_TYPE'],
 			'S_EndOfLife' => self::s_checkdate($aVM['CA-S_DATEFINVIE']),
 			'location_id' => self::s_set_location($aVM['CA-S_SITE']),
+      'power_status' => $aVM['powerState'],
+      'vcenter' => $aVM['vcenter'],
 		);
 	}
 
