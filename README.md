@@ -25,7 +25,7 @@ Collect the Serial Number, the UUID (in a non standard field named S_UUID) and t
 
 ## Virtual Machine
 
-Collect for each VM the space usage on each Datastore (but this works because of other tasks I have collecting on my dissk Array datastore informations)...
+Collect for each VM the space usage on each Datastore (but this works because of other tasks I have collecting on my disk Array datastore informations)...
 
 A picture better than a long text :
 
@@ -40,4 +40,10 @@ For the OS : instead of using the VMware value 'OS from configuration field' I u
 I position the VM on the correct location (also a custom extension, and these tests are totally specific!). This is to know in wich Datacenter the VM is.
 
 I position the 'move2production' date from one of our Custom attributes (again very specific).
+
+Collect the VCenter, as an URL so I can jump from iTop to the good VCenter (useless if you have only one !)
+
+Collect the PowerStatus of the VM : in some extractions, I only count 'poweredOn' VM
+
+Many attributes are now updatables.
 
