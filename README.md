@@ -36,10 +36,12 @@ vsphere-data-collector-1.0.12/collectors/vSphereServerCollector.class.inc.php
 
 vsphere-data-collector-1.0.12/collectors/vSphereServerCollector.json
 * Add here the configuration for the field S_UUID where I actually store the server's UUID 
+
 --> Could I add also a complete definition of a field in the param.local file ?
 
 vsphere-data-collector-1.0.12/collectors/vSphereVirtualMachineCollector.class.inc.php
 * Just modify the class definition to extend not the Collector class, but the ConfigurableCollector class
+
 --> I think this one was missed in your distribution set
 * Adds a bazillion fields to collect a lot of stuff I found useful for our VM. YMMV!
 
@@ -48,6 +50,7 @@ vsphere-data-collector-1.0.12/collectors/vSphereVirtualMachineCollector.json
 
 vsphere-data-collector-1.0.12/collectors/vSphereVirtualMachineTeemIpCollector.class.inc.php
 * Did here two modifications because I changed an underlying funct in the vSpherVirtualMachine class
+
 --> Never tested it, as I don't use TeemIP
 
 vsphere-data-collector-1.0.12/exec.php
